@@ -1,14 +1,16 @@
-#include <iostream>
-#include <EGL/egl.h>
-#ifdef OPENGLES2
-    #include <GLES2/gl2.h>
-#else
-    #include <GLES3/gl3.h>
-#endif
+#include <QApplication>
+#include <QLabel>
 
-int main()
+int da_drumu_lu_main(int argc, char ** argv)
 {
-    std::cout<<"say something!"<<std::endl;
-    std::cout<<eglGetError()<<glGetError()<<std::endl;
-    return 0;
+    QApplication a(argc, argv);
+    QLabel l;
+    l.setText("Qt on Android");
+    l.show();
+    return a.exec();
+}
+
+int main(int argc, char ** argv)
+{
+    return da_drumu_lu_main(argc, argv);
 }
