@@ -27,22 +27,22 @@ SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 include(QtAndroid)
 
 
-add_executable(TestCMake main.cpp)
+add_program(TestCMake main.cpp)
 target_link_libraries( TestCMake Qt5::Widgets )
 #target_link_libraries( TestCMake ${ZLIB_LIBRARIES} ${EGL_LIBRARIES} ${ANDROID_LIBRARIES} ${OPENSLES_LIBRARIES} ${OPENGL_LIBRARIES} Qt5::Widgets )
 
 
-add_library(TestCMake1 SHARED main.cpp)
-target_link_libraries( TestCMake1 Qt5::Widgets )
+#add_library(TestCMake1 SHARED main.cpp)
+#target_link_libraries( TestCMake1 Qt5::Widgets )
 
 
-add_library(TestCMake2 SHARED main.cpp)
-target_link_libraries( TestCMake2 Qt5::Widgets )
+#add_library(TestCMake2 SHARED main.cpp)
+#target_link_libraries( TestCMake2 Qt5::Widgets )
 
 ######### android stuff #########
 
 # this is the only line that is mandatory !
-set_android_application_binary(TestCMake1)
+set_android_application_binary(TestCMake)
 
 # the following lines are optional
 #add_custom_android_files(${CMAKE_SOURCE_DIR}/android)

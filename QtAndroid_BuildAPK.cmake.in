@@ -72,7 +72,7 @@ if (NOT (ANDROID_BINARY_PREFIX STREQUAL "lib"))
 endif()
 
 if (NOT ANDROID_BINARY_EXT OR NOT (ANDROID_BINARY_EXT STREQUAL ".so"))
-    message(WARNING "The android application binary doesn't seem to be a library, debuggind will not work!")
+    message(WARNING "The android application binary doesn't seem to be a library, debuggind will not work!\nUse \"add_program\" instead of \"add_executable\"")
     set(ANDROID_BINARY_NAME "${ANDROID_BINARY_NAME}.so")
 endif()
 

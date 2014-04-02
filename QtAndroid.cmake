@@ -51,3 +51,7 @@ endfunction()
 
 configure_file(QtAndroid_BuildAPK.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/QtAndroid_BuildAPK.cmake @ONLY)
 add_custom_target(build_apk COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/QtAndroid_BuildAPK.cmake)
+
+macro(add_program _targetName _sources)
+ add_library(${_targetName} SHARED ${_sources})
+endmacro()
