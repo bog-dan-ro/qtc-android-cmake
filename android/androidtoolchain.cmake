@@ -104,8 +104,7 @@ elseif(ANDROID_TARGET_ARCH STREQUAL mips)
 endif()
 
 set(CMAKE_ANDROID_BUILD_FOLDER ${PROJECT_BINARY_DIR}/android-build)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_ANDROID_BUILD_FOLDER}/libs/${ANDROID_TARGET_ARCH})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+set(CMAKE_ANDROID_NATIVE_LIBS_FOLDER ${CMAKE_ANDROID_BUILD_FOLDER}/libs/${ANDROID_TARGET_ARCH})
 
 ## Copy the gradle template
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${ANDROID_SDK_ROOT}/tools/templates/gradle/wrapper ${CMAKE_ANDROID_BUILD_FOLDER})
@@ -119,4 +118,3 @@ file(WRITE ${CMAKE_ANDROID_BUILD_FOLDER}/android-deployment-settings.json "{
   \"toolchain-version\": \"${ANDROID_NDK_TOOLCHAIN_VERSION}\",
   \"ndk-host\": \"${ANDROID_NDK_HOST}\",
   \"target-architecture\": \"${ANDROID_TARGET_ARCH}\",\n")
-

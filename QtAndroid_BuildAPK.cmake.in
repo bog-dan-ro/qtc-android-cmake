@@ -1,0 +1,136 @@
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+include(QtAndroid_Application_Binary OPTIONAL RESULT_VARIABLE _var)
+if (_var STREQUAL "NOTFOUND")
+    message (FATAL_ERROR "Android application binray is not set.\nYou must use \"set_android_application_binary(TARGET)\" to set it.")
+endif()
+unset(_var)
+
+if (NOT EXISTS ${CMAKE_ANDROID_APPLICATION_BINARY})
+    message (FATAL_ERROR "Android application binray \"${CMAKE_ANDROID_APPLICATION_BINARY}\" doesn not exists.\nYou must use \"set_android_application_binary(TARGET)\" to set it.")
+endif()
+
+include(QtAndroid_Application_Libraries OPTIONAL)
+include(QtAndroid_Custom_AndroidFiles OPTIONAL)
+
+## Remove android build folder
+execute_process(COMMAND @CMAKE_COMMAND@ -E remove_directory @CMAKE_ANDROID_BUILD_FOLDER@)
+
+## Copy the gradle template
+execute_process(COMMAND @CMAKE_COMMAND@ -E copy_directory @ANDROID_SDK_ROOT@/tools/templates/gradle/wrapper @CMAKE_ANDROID_BUILD_FOLDER@)
+
+file(WRITE @CMAKE_ANDROID_BUILD_FOLDER@/local.properties "sdk.dir=@ANDROID_SDK_ROOT@")
+
+set(ANDROID_DEPLOY_SETTINGS "@CMAKE_ANDROID_BUILD_FOLDER@/android-deployment-settings.json")
+file(WRITE ${ANDROID_DEPLOY_SETTINGS} "{
+  \"sdk\": \"@ANDROID_SDK_ROOT@\",
+  \"ndk\": \"@ANDROID_NDK_ROOT@\",
+  \"toolchain-prefix\": \"@ANDROID_NDK_TOOLCHAIN_PREFIX@\",
+  \"tool-prefix\": \"@ANDROID_NDK_TOOLS_PREFIX@\",
+  \"toolchain-version\": \"@ANDROID_NDK_TOOLCHAIN_VERSION@\",
+  \"ndk-host\": \"@ANDROID_NDK_HOST@\",
+  \"target-architecture\": \"@ANDROID_TARGET_ARCH@\",
+  \"qt\" : \"@_qt5Core_install_prefix@\",\n")
+
+if (CMAKE_ANDROID_APPLICATION_LIBRARIES)
+    list(REMOVE_DUPLICATES CMAKE_ANDROID_APPLICATION_LIBRARIES)
+    foreach(library ${CMAKE_ANDROID_APPLICATION_LIBRARIES})
+        if (EXISTS ${library})
+            if (NOT _var)
+                set(_var ${library})
+            else()
+                set(_var "${_var},${library}")
+            endif()
+            get_filename_component(fileName ${library} NAME)
+            execute_process(COMMAND @CMAKE_COMMAND@ -E copy ${library} @CMAKE_ANDROID_NATIVE_LIBS_FOLDER@/${fileName})
+        else()
+            message(WARNING "Android library '${library}' does not exists, skipping")
+        endif()
+    endforeach()
+
+    if (_var)
+        file(APPEND ${ANDROID_DEPLOY_SETTINGS} "  \"application-extra-libs\" : \"${_var}\",\n")
+    endif()
+
+    unset(_var)
+endif()
+
+if (EXISTS ${ANDROID_CUSTOM_SOURCES})
+    file(APPEND ${ANDROID_DEPLOY_SETTINGS} "  \"android-package-source-directory\" : \"${ANDROID_CUSTOM_SOURCES}\",\n")
+else()
+    message(STATUS "Android custom folder ${ANDROID_CUSTOM_SOURCES} does not exists.")
+endif()
+
+# set android binary
+get_filename_component(ANDROID_BINARY_NAME ${CMAKE_ANDROID_APPLICATION_BINARY} NAME)
+get_filename_component(ANDROID_BINARY_EXT ${CMAKE_ANDROID_APPLICATION_BINARY} EXT)
+
+#check the exectable name sanity
+STRING(SUBSTRING ${ANDROID_BINARY_NAME} 0 3 ANDROID_BINARY_PREFIX)
+if (NOT (ANDROID_BINARY_PREFIX STREQUAL "lib"))
+    set(ANDROID_BINARY_NAME "lib${ANDROID_BINARY_NAME}")
+endif()
+
+if (NOT ANDROID_BINARY_EXT OR NOT (ANDROID_BINARY_EXT STREQUAL ".so"))
+    set(ANDROID_BINARY_NAME "${ANDROID_BINARY_NAME}.so")
+endif()
+
+execute_process(COMMAND @CMAKE_COMMAND@ -E copy ${CMAKE_ANDROID_APPLICATION_BINARY} @CMAKE_ANDROID_NATIVE_LIBS_FOLDER@/${ANDROID_BINARY_NAME})
+
+file(APPEND ${ANDROID_DEPLOY_SETTINGS} "  \"application-binary\" : \"@CMAKE_ANDROID_NATIVE_LIBS_FOLDER@/${ANDROID_BINARY_NAME}\"\n}\n")
+
+
+######################################################################################################
+# build the package
+set(ANDROID_DEPLOY_ARGS --output @CMAKE_ANDROID_BUILD_FOLDER@ --input ${ANDROID_DEPLOY_SETTINGS})
+
+set(ANDROID_DEPLOY_QT_DEPLOYMENT $ENV{ANDROID_DEPLOY_QT_DEPLOYMENT})
+if (NOT ANDROID_DEPLOY_QT_DEPLOYMENT)
+    set(ANDROID_DEPLOY_QT_DEPLOYMENT "ministro")
+endif()
+set(ANDROID_DEPLOY_ARGS ${ANDROID_DEPLOY_ARGS} --deployment ${ANDROID_DEPLOY_QT_DEPLOYMENT})
+
+
+set(ANDROID_DEPLOY_QT_ANT $ENV{ANDROID_DEPLOY_QT_ANT})
+if (NOT ANDROID_DEPLOY_QT_ANT)
+    set(ANDROID_DEPLOY_QT_ANT "ant")
+endif()
+set(ANDROID_DEPLOY_ARGS ${ANDROID_DEPLOY_ARGS} --ant ${ANDROID_DEPLOY_QT_ANT})
+
+set(ANDROID_DEPLOY_QT_ANDROID_PLATFORM $ENV{ANDROID_DEPLOY_QT_ANDROID_PLATFORM})
+if (NOT ANDROID_DEPLOY_QT_ANDROID_PLATFORM)
+    set(ANDROID_DEPLOY_QT_ANDROID_PLATFORM "android-14")
+endif()
+set(ANDROID_DEPLOY_ARGS ${ANDROID_DEPLOY_ARGS} --android-platform ${ANDROID_DEPLOY_QT_ANDROID_PLATFORM})
+
+set(ANDROID_DEPLOY_QT_JDK $ENV{ANDROID_DEPLOY_QT_JDK})
+if (ANDROID_DEPLOY_QT_JDK)
+    set(ANDROID_DEPLOY_ARGS ${ANDROID_DEPLOY_ARGS} --jdk ${ANDROID_DEPLOY_QT_JDK})
+endif()
+
+set(ANDROID_DEPLOY_QT_VERBOSE $ENV{ANDROID_DEPLOY_QT_VERBOSE})
+if (ANDROID_DEPLOY_QT_VERBOSE AND ANDROID_DEPLOY_QT_VERBOSE STREQUAL "1")
+    set(ANDROID_DEPLOY_ARGS ${ANDROID_DEPLOY_ARGS} --verbose)
+endif()
+
+set(ANDROID_DEPLOY_QT_SIGN $ENV{ANDROID_DEPLOY_QT_SIGN})
+set(ANDROID_DEPLOY_QT_KEYSTOREPATH $ENV{ANDROID_DEPLOY_QT_KEYSTOREPATH})
+set(ANDROID_DEPLOY_QT_CERTIFICATEALIAS $ENV{ANDROID_DEPLOY_QT_CERTIFICATEALIAS})
+if (ANDROID_DEPLOY_QT_SIGN AND ANDROID_DEPLOY_QT_SIGN STREQUAL "1"
+        AND ANDROID_DEPLOY_QT_KEYSTOREPATH
+        AND ANDROID_DEPLOY_QT_CERTIFICATEALIAS)
+    set(ANDROID_DEPLOY_ARGS ${ANDROID_DEPLOY_ARGS} --sign ${ANDROID_DEPLOY_QT_KEYSTOREPATH} ${ANDROID_DEPLOY_QT_CERTIFICATEALIAS} )
+endif()
+
+set(ANDROID_DEPLOY_QT_STOREPASS $ENV{ANDROID_DEPLOY_QT_STOREPASS})
+if (ANDROID_DEPLOY_QT_STOREPASS)
+    set(ANDROID_DEPLOY_ARGS ${ANDROID_DEPLOY_ARGS} --storepass ${ANDROID_DEPLOY_QT_STOREPASS})
+endif()
+
+set(ANDROID_DEPLOY_QT_KEYPASS $ENV{ANDROID_DEPLOY_QT_KEYPASS})
+if (ANDROID_DEPLOY_QT_KEYPASS)
+    set(ANDROID_DEPLOY_ARGS ${ANDROID_DEPLOY_ARGS} --keypass ${ANDROID_DEPLOY_QT_KEYPASS})
+endif()
+
+execute_process(COMMAND @QT_ANDROIDDEPLOYQT_EXECUTABLE@ ${ANDROID_DEPLOY_ARGS})
+######################################################################################################
