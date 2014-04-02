@@ -53,7 +53,6 @@ include_directories(SYSTEM
   ${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/include
   ${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH}/include)
 
-link_directories(${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH})
 
 set(CMAKE_C_COMPILER "${ANDROID_NDK_ROOT}/toolchains/${ANDROID_NDK_TOOLCHAIN_PREFIX}-${ANDROID_NDK_TOOLCHAIN_VERSION}/prebuilt/${ANDROID_NDK_HOST}/bin/${ANDROID_NDK_TOOLS_PREFIX}-gcc")
 set(CMAKE_CXX_COMPILER "${ANDROID_NDK_ROOT}/toolchains/${ANDROID_NDK_TOOLCHAIN_PREFIX}-${ANDROID_NDK_TOOLCHAIN_VERSION}/prebuilt/${ANDROID_NDK_HOST}/bin/${ANDROID_NDK_TOOLS_PREFIX}-g++")
@@ -69,17 +68,17 @@ else()
   execute_process(COMMAND "${CMAKE_C_COMPILER}" -print-libgcc-file-name OUTPUT_VARIABLE LIBGCC OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-set(CMAKE_MODULE_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -lgnustl_shared -lm -lc ${LIBGCC}")
-set(CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -lgnustl_shared -lm -lc ${LIBGCC}")
-set(CMAKE_MODULE_LINKER_FLAGS_RELEASE_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -lgnustl_shared -lm -lc ${LIBGCC}")
+set(CMAKE_MODULE_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -L${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH} -lgnustl_shared -lm -lc ${LIBGCC}")
+set(CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -L${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH} -lgnustl_shared -lm -lc ${LIBGCC}")
+set(CMAKE_MODULE_LINKER_FLAGS_RELEASE_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -L${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH} -lgnustl_shared -lm -lc ${LIBGCC}")
 
-set(CMAKE_SHARED_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -lgnustl_shared -lm -lc ${LIBGCC}")
-set(CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -lgnustl_shared -lm -lc ${LIBGCC}")
-set(CMAKE_SHARED_LINKER_FLAGS_RELEASE_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -lgnustl_shared -lm -lc ${LIBGCC}")
+set(CMAKE_SHARED_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -L${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH} -lgnustl_shared -lm -lc ${LIBGCC}")
+set(CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -L${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH} -lgnustl_shared -lm -lc ${LIBGCC}")
+set(CMAKE_SHARED_LINKER_FLAGS_RELEASE_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -L${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH} -lgnustl_shared -lm -lc ${LIBGCC}")
 
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -lgnustl_shared -lm -lc ${LIBGCC}")
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -lgnustl_shared -lm -lc ${LIBGCC}")
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -lgnustl_shared -lm -lc ${LIBGCC}")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -L${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH} -lgnustl_shared -lm -lc ${LIBGCC}")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -L${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH} -lgnustl_shared -lm -lc ${LIBGCC}")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--no-undefined -Wl,-z,noexecstack -shared -L${ANDROID_NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/${ANDROID_NDK_TOOLCHAIN_VERSION}/libs/${ANDROID_TARGET_ARCH} -lgnustl_shared -lm -lc ${LIBGCC}")
 
 if (ANDROID_TARGET_ARCH STREQUAL armeabi-v7a)
   set(CMAKE_C_FLAGS "-Wno-psabi -march=armv7-a -mfloat-abi=softfp -mfpu=vfp -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -DANDROID -Wa,--noexecstack" CACHE STRING "Qt on Android" FORCE)
@@ -105,16 +104,3 @@ endif()
 
 set(CMAKE_ANDROID_BUILD_FOLDER ${PROJECT_BINARY_DIR}/android-build)
 set(CMAKE_ANDROID_NATIVE_LIBS_FOLDER ${CMAKE_ANDROID_BUILD_FOLDER}/libs/${ANDROID_TARGET_ARCH})
-
-## Copy the gradle template
-execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${ANDROID_SDK_ROOT}/tools/templates/gradle/wrapper ${CMAKE_ANDROID_BUILD_FOLDER})
-
-file(WRITE ${CMAKE_ANDROID_BUILD_FOLDER}/local.properties "sdk.dir=${ANDROID_SDK_ROOT}")
-file(WRITE ${CMAKE_ANDROID_BUILD_FOLDER}/android-deployment-settings.json "{
-  \"sdk\": \"${ANDROID_SDK_ROOT}\",
-  \"ndk\": \"${ANDROID_NDK_ROOT}\",
-  \"toolchain-prefix\": \"${ANDROID_NDK_TOOLCHAIN_PREFIX}\",
-  \"tool-prefix\": \"${ANDROID_NDK_TOOLS_PREFIX}\",
-  \"toolchain-version\": \"${ANDROID_NDK_TOOLCHAIN_VERSION}\",
-  \"ndk-host\": \"${ANDROID_NDK_HOST}\",
-  \"target-architecture\": \"${ANDROID_TARGET_ARCH}\",\n")

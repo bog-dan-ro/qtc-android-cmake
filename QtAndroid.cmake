@@ -50,6 +50,4 @@ endfunction()
 #############################################################################################################################################
 
 configure_file(QtAndroid_BuildAPK.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/QtAndroid_BuildAPK.cmake @ONLY)
-
-set(CMAKE_ANDROID_APPLICATION_BINARY "" CACHE INTERNAL "Android Application Binary" FORCE)
 add_custom_target(build_apk COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/QtAndroid_BuildAPK.cmake)
