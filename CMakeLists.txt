@@ -42,11 +42,11 @@ target_link_libraries( TestCMake2 Qt5::Widgets )
 ######### android stuff #########
 
 # this is the only line that is mandatory !
-set_android_application_binary(TestCMake)
+set_android_application_binary(TestCMake1)
 
 # the following lines are optional
-add_custom_android_files(${CMAKE_SOURCE_DIR}/android)
-add_android_application_library(TestCMake1)
-add_android_application_library(TestCMake2)
+#add_custom_android_files(${CMAKE_SOURCE_DIR}/android)
+#add_android_application_library(TestCMake1)
+#add_android_application_library(TestCMake2)
 
 ######### android stuff #########
